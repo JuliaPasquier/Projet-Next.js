@@ -1,4 +1,4 @@
-import "@/assets/styles/tailwind.css";
+import "@/assets/globals.css";
 
 import AuthProvider from '@/components/AuthProvider';
 import Footer from '@/components/Footer';

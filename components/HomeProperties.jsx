@@ -1,6 +1,6 @@
 import PropertyCard from "@/components/PropertyCard";
 import Link from "next/link";
-import { fetchProperties } from "@/utils/requests";
+import { fetchProperties } from "@/utils/request";
 
 const HomeProperties = async () => {
     const properties = await fetchProperties();
