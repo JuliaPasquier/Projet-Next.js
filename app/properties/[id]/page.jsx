@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { fetchProperty } from "@/utils/requests";
+import { fetchProperty } from "@/utils/request";
 import PropertyHeaderImage from "@/components/PropertyHeaderImage";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import PropertyDetails from "@/components/PropertyDetails";
-import Spinner from "@/components/Spinner";
+import Spinner from "@/components/Spinner"
 
 const PropertyPage = () => {
     const { id } = useParams();
