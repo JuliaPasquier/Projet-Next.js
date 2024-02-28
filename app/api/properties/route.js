@@ -1,5 +1,7 @@
 import connectDB from "@/config/database";
 import Property from "@/models/Property";
+import { getSessionUser } from "@/utils/getSessionUser";
+import { getSession } from "next-auth/react";
 
 // GET /api/properties
 export const GET = async (request) => {
@@ -16,10 +18,26 @@ export const GET = async (request) => {
     }
 };
 
+// POST /api/properties
 export const POST = async (request) => {
     try {
+        await connectDB(); // Connect to database
+
+        const sessionUser = await getSessionUser();
+
+        // Handle error if no user is found in the session
+        if (!sessionUser || !sessionUser.userId) {
+            return new Response("Unauthorized, userId is required", {
+                status: 401,
+            });
+        }
+
+        const { userId } = sessionUser;
+
         const formData = await request.formData();
 
+
+        // Acces all values from amenities and images
         const amenities = formData.getAll("amenities");
         const images = formData.getAll("images").filter((image) => image.name !== '')
             .getAll('images')
@@ -51,14 +69,19 @@ export const POST = async (request) => {
                 email: formData.get("seller_info.email"),
                 phone: formData.get("seller_info.phone"),
             },
-            images
+            owner: userId,
+            // images
 
         };
 
-
-        return new Response(JSON.stringify({ message: 'Succes' }), {
-            status: 200,
-        });
+        const newProperty = new Property(propertyData);
+        await newProperty.save();
+        return Response.redirect(
+            `${process.env.NEXTAUTH_URL}/properties/${newProperty._id}`
+        );
+        // return new Response(JSON.stringify({ message: 'Succes' }), {
+        //     status: 200,
+        // });
     } catch (error) {
         return new Response("Something Went Wrong...", { status: 500 });
     }
