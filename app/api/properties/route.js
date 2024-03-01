@@ -1,6 +1,7 @@
 import connectDB from "@/config/database";
 import Property from "@/models/Property";
 import { getSessionUser } from "@/utils/getSessionUser";
+import cloudinary from "@/config/cloudinary";
 
 
 // GET /api/properties
@@ -71,6 +72,38 @@ export const POST = async (request) => {
             },
             owner: userId,
         };
+
+
+        // Upload image(s) to Cloudinary
+        const imageUploadPromises = [];
+        for (const image of images) {
+            // Convert image to arrayBuffer so it can be uploaded to Cloudinary
+            const imageBuffer = await image.arrayBuffer();
+            const imageArray = Array.from(new Uint8Array(imageBuffer));
+            const imageData = Buffer.from(imageArray);
+
+            // Convert imageArray to base64 string
+            const imageBase64 = imageData.toString("base64");
+
+            // Make request to upload image to Cloudinary
+            const result = await cloudinary.uploader.upload(
+                `data:image/png;base64,${imageBase64}`,
+                {
+                    folder: "propertypulse",
+                }
+            );
+
+            // Push the result of the image upload to the imageUploadPromises array
+            imageUploadPromises.push(result.secure_url);
+
+            // Wait for all images to upload
+            const uploadedImages = await Promise.all(imageUploadPromises);
+
+            // Add uploaded images to propertyData object
+            propertyData.images = uploadedImages;
+        }
+
+
         const newProperty = new Property(propertyData);
         await newProperty.save();
 
@@ -82,6 +115,8 @@ export const POST = async (request) => {
         //     status: 201,
         // });
     } catch (error) {
+
+        console.log(error);
         return new Response("Failed to add neww property...", { status: 500 });
     }
 };
