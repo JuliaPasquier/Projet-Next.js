@@ -20,4 +20,4 @@ export const GET = async (request, { params }) => {
     } catch (error) {
         return new Response("Something Went Wrong...", { status: 500 });
     }
-}
+};
